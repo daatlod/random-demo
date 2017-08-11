@@ -19,7 +19,8 @@ demoRan.selectItems = {
 						]	
 					};					
 					
-
+// Get a reference to the database service
+var database = firebase.database();
 
 /*Config auth firebase*/
 initApp = function() {
@@ -59,21 +60,10 @@ initApp = function() {
 	});
 };
 
-window.addEventListener('load', function() {
-	initApp()
-});
-
-
 
 demoRan.showSelect = function(){
-	
-
 	$('#account-details').text(demoRan.user);
-
 	demoRan.randomImages();
-
-
-
 }
 
 demoRan.randomImages = function(){
@@ -84,16 +74,16 @@ demoRan.randomImages = function(){
 		 randomNumberTwo = Math.floor((Math.random() * 12) + 1);
 	}
 
-
-
 	$('.image-one').html('<a href="#" class="nameOne" data-name="'+demoRan.selectItems.data[randomNumberOne].name+'"><img src="images/'+ demoRan.selectItems.data[randomNumberOne].id+'.png" /><br>'+ demoRan.selectItems.data[randomNumberOne].name+'</a>');
-
 	$('.image-two').html('<a href="#" class="nameTwo" data-name="'+demoRan.selectItems.data[randomNumberTwo].name+'"><img src="images/'+ demoRan.selectItems.data[randomNumberTwo].id+'.png" /><br>'+ demoRan.selectItems.data[randomNumberTwo].name+'</a>');
 
 }
 
 
 $(function() {
+
+	initApp();
+
 	$( document ).on( "click", "a.nameOne, a.nameTwo", function() {
   			demoRan.choosed =  $(this).data("name")
 	});

@@ -1,24 +1,11 @@
 /*vars*/
 var demoRan = {};
 demoRan.user;
-demoRan.choosed;
-demoRan.selectItems = {
-						"data":[
-							{"id":"r1", "name":"alment"},
-							{"id":"r2","name":"chantilli"},
-							{"id":"r3","name":"chocolat"},
-							{"id":"r4","name":"coconut"},
-							{"id":"r5","name":"apple"},
-							{"id":"r6","name":"balcberry"},
-							{"id":"r7","name":"kiwi"},
-							{"id":"r8","name":"startfruit"},
-							{"id":"r9","name":"raspberry"},
-							{"id":"r10","name":"peanut"},
-							{"id":"r11","name":"cheese"},
-							{"id":"r12","name":"cream"}
-						]	
-					};					
-					
+demoRan.choosed = '';
+demoRan.selectItems = {};
+demoRan.urlIamgesService = 'https://unsplash.it/';
+demoRan.urlIamgesServiceList = demoRan.urlIamgesService+'list';
+
 // Get a reference to the database service
 var database = firebase.database();
 
@@ -32,7 +19,8 @@ initApp = function() {
 	    user.getIdToken().then(function(accessToken) {
 	     
 	     	demoRan.user = 	displayName;
-	     	demoRan.showSelect();     	
+	     	demoRan.jsonImages();
+	     	//demoRan.showSelect();     	
 	      
 	    });
 	  } else {            
@@ -60,31 +48,81 @@ initApp = function() {
 	});
 };
 
+/*load json images*/
+demoRan.jsonImages = function(){
+	$.getJSON(demoRan.urlIamgesServiceList, function(result){
+        demoRan.selectItems = result;
+        demoRan.randomImages();        
+    });
+}
 
+/*first step after login*/
 demoRan.showSelect = function(){
 	$('#account-details').text(demoRan.user);
-	demoRan.randomImages();
+	$('#selectBox').removeClass('hide');
+	$('#loginBox').addClass('hide');	
 }
 
+/*generate random images from services*/
 demoRan.randomImages = function(){
-	var randomNumberOne = Math.floor((Math.random() * 12) + 1);
-	var randomNumberTwo = Math.floor((Math.random() * 12) + 1);
+	var qy =  demoRan.selectItems.length;
+
+	var randomNumberOne = Math.floor(Math.random() * qy);
+	var randomNumberTwo = Math.floor(Math.random() * qy);
 
 	if(randomNumberOne == randomNumberTwo){
-		 randomNumberTwo = Math.floor((Math.random() * 12) + 1);
+		 randomNumberTwo = Math.floor(Math.random() * qy);
 	}
 
-	$('.image-one').html('<a href="#" class="nameOne" data-name="'+demoRan.selectItems.data[randomNumberOne].name+'"><img src="images/'+ demoRan.selectItems.data[randomNumberOne].id+'.png" /><br>'+ demoRan.selectItems.data[randomNumberOne].name+'</a>');
-	$('.image-two').html('<a href="#" class="nameTwo" data-name="'+demoRan.selectItems.data[randomNumberTwo].name+'"><img src="images/'+ demoRan.selectItems.data[randomNumberTwo].id+'.png" /><br>'+ demoRan.selectItems.data[randomNumberTwo].name+'</a>');
+	$('.image-one').html('<a href="#" class="nameOne" data-name="'+demoRan.selectItems[randomNumberOne].filename+'"><img src="'+demoRan.urlIamgesService+'200/300?image='+demoRan.selectItems[randomNumberOne].id+'" /><br><span class="text">'+ demoRan.selectItems[randomNumberOne].filename+'</span></a>');
+	$('.image-two').html('<a href="#" class="nameOne" data-name="'+demoRan.selectItems[randomNumberTwo].filename+'"><img src="'+demoRan.urlIamgesService+'200/300?image='+demoRan.selectItems[randomNumberTwo].id+'" /><br><span class="text">'+ demoRan.selectItems[randomNumberTwo].filename+'</span></a>');
+
+	demoRan.showSelect();
 
 }
 
+/*send data to database*/
+demoRan.writeUserData  = function(userId, name, imageUrl) {
+  firebase.database().ref('users/' + userId).set({
+  	nameUser: name,    
+    imageselect : imageUrl
+  });
+}
 
 $(function() {
 
 	initApp();
 
-	$( document ).on( "click", "a.nameOne, a.nameTwo", function() {
-  			demoRan.choosed =  $(this).data("name")
+	$( document ).on( "click", "a.nameOne, a.nameTwo", function(e) {
+		e.preventDefault();
+		$('a.nameOne, a.nameTwo').addClass('noselect');
+		$(this).removeClass('noselect');
+		$(this).addClass('select');
+
+  		demoRan.choosed =  $(this).data("name");
+	});
+	
+	$( document ).on( "click", "a#sendResults", function(e) {
+		e.preventDefault();
+		if(demoRan.choosed == ''){
+			alert('choose a image');
+		}else{
+			var userId = firebase.auth().currentUser.uid;
+  			demoRan.writeUserData(userId, demoRan.user, demoRan.choosed);
+  			$('#selectBox').addClass('hide');	
+  			$('#thanksBox').removeClass('hide');		
+		}
+		
+	});
+
+	$('#another').on('click', function(e){
+		e.preventDefault();
+		$('#selectBox').removeClass('hide');	
+  		$('#thanksBox').addClass('hide');
+  		demoRan.choosed = '';
+  		demoRan.randomImages();
 	});
 });
+
+
+

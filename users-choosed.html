@@ -2,38 +2,20 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>Demo images random</title>
+<title>Demo images random - users choosed</title>
 </head>
 <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/2.3.0/firebaseui.css" />
 <link href="https://fonts.googleapis.com/css?family=Quicksand:400,500" rel="stylesheet">
 <link type="text/css" rel="stylesheet" href="css/styles.css" />
 <body>
-  <div id="appBox">
-
-  	<div id="loginBox">
-      <h2>Please login</h2>
-      <div id="firebaseui-auth-container">
+  <div id="usersBox">
+  	<div id="usersList">
+      <div class="topBox clearfix">
+        <div class="col1">User</div><div class="col2">Image choosed</div>
       </div>
     </div>
-
-    <div id="selectBox" class="hide">
-      <h2>Choose you favorite image</h2>
-      <p id="account-details"></p>
-      <div class="clearfix pics">
-        <div>
-          <div class="image-one"></div>
-        </div>
-        <div>
-          <div class="image-two"></div>
-        </div>
-      </div>
-      <p class="text-btn"><a href="#" id="sendResults">Send choose</a></p>
-    </div>
-    <div id="thanksBox" class="hide">
-      <h2>Thanks!</h2>
-      <p class="text-btn"><a href="#" id="another">choose another?</a></p>
-    </div>
-  </div>
+  </div> 
+  
 
 </body>
 
@@ -53,5 +35,22 @@
 </script>
 <script src="https://cdn.firebase.com/libs/firebaseui/2.3.0/firebaseui.js"></script>
 
-<script src="js/app.js"></script>
+<script>
+  var userDataRef = firebase.database().ref("users").orderByKey();
+  userDataRef.once("value").then(function(snapshot) {
+  snapshot.forEach(function(childSnapshot) {
+    var key = childSnapshot.key;
+    var childData = childSnapshot.val();              
+
+    var name = childSnapshot.val().nameUser;
+    var imageSel = childSnapshot.val().imageselect;
+
+    $("#usersList").append("<div class='row clearfix'><div class='col1'>" + name + "</div><div class='col2'> " + imageSel + "</div></div>");
+
+    });
+  });
+
+  
+
+</script>
 </html>
